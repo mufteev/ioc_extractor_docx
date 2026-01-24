@@ -64,14 +64,6 @@ class RegexPatternRule(IoCExtractionRule):
             if text:
                 all_text_parts.append(text)
         
-        # Собираем текст из таблиц
-        # for table in document.tables:
-        #     for row in table.rows:
-        #         for cell in row.cells:
-        #             text = self._get_cell_text(cell)
-        #             if text:
-        #                 all_text_parts.append(text)
-        
         full_text = self.normalize_text_for_url_extraction('\n'.join(all_text_parts))
         
         # Применяем все паттерны
