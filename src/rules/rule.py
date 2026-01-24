@@ -47,8 +47,9 @@ class IoCExtractionRule(ABC):
         
         Собирает текст из всех runs (фрагментов с одинаковым форматированием),
         что позволяет игнорировать стилизацию.
+        Убирает символы перевода строки внутри runs игнорируя мягкие разрывы строк Shift + Enter.
         """
-        return "".join(run.text for run in paragraph.runs)
+        return "".join(run.text.replace('\n', '') for run in paragraph.runs)
     
     def _get_cell_text(self, cell) -> str:
         """Извлекает текст из ячейки таблицы."""
