@@ -1,0 +1,69 @@
+
+## Возможности
+
+Скрипт извлекает IoC из документов Word с учётом следующих особенностей:
+
+1. **Списки после двоеточия** — извлекает элементы из структурированных списков формата:
+   ```
+   Заголовок с двоеточием:
+   индикатор1;
+   индикатор2;
+   последний_индикатор.
+   ```
+
+2. **Таблицы с IoC** — извлекает данные из таблиц, которым предшествует заголовок "Индикаторы компрометации" или аналогичный.
+
+3. **Regex-поиск** — находит хэши, URL, IP-адреса и другие паттерны по всему тексту документа.
+
+4. **Игнорирование форматирования** — стилизация (жирный, курсив, размер шрифта) не влияет на извлечение.
+
+5. **Дефангинг/рефангинг** — автоматически преобразует "обезвреженные" URL (hxxps[:]//example[.]com → https://example.com).
+
+## Поддерживаемые типы IoC
+
+| Тип | Пример |
+|-----|--------|
+| MD5 | `d41d8cd98f00b204e9800998ecf8427e` |
+| SHA1 | `da39a3ee5e6b4b0d3255bfef95601890afd80709` |
+| SHA256 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| SHA512 | (128 символов hex) |
+| URL | `https://example.com/path` |
+| Domain | `malicious.example.com` |
+| IP | `192.168.1.1` |
+| Email | `attacker@evil.com` |
+| CVE | `CVE-2024-12345` |
+
+
+
+## Установка
+
+```bash
+python -m venv .venv
+
+```
+
+## Использование
+
+```bash
+usage: main.py [-h] -o OUTPUT [-f {json,txt,csv,xlsx}] [--unknown] files [files ...]
+
+Извлечение индикаторов компрометации из DOCX-документов
+
+positional arguments:
+  files                 Пути к DOCX-файлам для обработки
+
+options:
+  -h, --help            show this help message and exit
+  -o, --output OUTPUT   Файл для сохранения результатов в JSON (по умолчанию: stdout)
+  -f, --format {json,txt,csv,xlsx}
+                        Формат вывода (по умолчанию: txt)
+  --unknown             Выводить unknown IoC (по умолчанию: не выводить)
+
+
+
+# Примеры
+python ./src/main.py -f xlsx -o res.xlsx ./docs/*.docx
+python ./src/main.py -f csv  -o res.csv  ./docs/*.docx
+python ./src/main.py -f json -o res.json ./docs/*.docx
+python ./src/main.py -f txt  -o res.txt  ./docs/*.docx
+```
