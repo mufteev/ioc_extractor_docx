@@ -46,25 +46,3 @@ def export_to_csv(
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL, escapechar='\\')
         writer.writeheader()
         writer.writerows(ioc_records)
-
-    # # Создаем DataFrame и сохраняем
-    # # index=False убирает ненужный индексный столбец
-    # df_iocs = pd.DataFrame(ioc_records)
-    
-    # # Если данных нет, создаем пустой DataFrame с нужными колонками
-    # if df_iocs.empty:
-    #     df_iocs = pd.DataFrame(columns=[
-    #         'filepath', 'value', 'ioc_type', 'source_context', 
-    #         'defanged', 'original_value'
-    #     ])
-    
-    # # Сохраняем основной файл с IoC
-    # df_iocs.to_csv(
-    #     output_path, 
-    #     index=False, 
-    #     quoting=csv.QUOTE_MINIMAL,
-    #     escapechar='\\',
-    #     encoding='utf-8-sig',
-    # )
-    
-    
