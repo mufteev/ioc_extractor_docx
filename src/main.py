@@ -36,6 +36,11 @@ if __name__ == "__main__":
         help="Выводить unknown IoC (по умолчанию: не выводить)"
     )
     parser.add_argument(
+        "--hash-original",
+        action="store_true",
+        help="Выводить оригинальные хэши (по умолчанию: приведение к верхнему регистру)"
+    )
+    parser.add_argument(
         "--url-original",
         action="store_true",
         help="Выводить оригинальные URL (по умолчанию: извлечение доменов и IP-адресов)"

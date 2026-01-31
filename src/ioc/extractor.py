@@ -31,9 +31,10 @@ from docx.document import Document
 from rules.list_after_colon import ListAfterColonRule
 from rules.table_after_header import TableAfterHeaderRule
 from rules.regex_pattern import RegexPatternRule
-
-from ioc.normalizer import IoC, IoCType
 from rules.rule import IoCExtractionRule
+
+from ioc.normalizer import IoC, IoCType, IoCNormalizer
+
 
 @dataclass
 class ExtractionResult:
@@ -81,18 +82,25 @@ class IoCExtractor:
         results = extractor.extract_from_files(["doc1.docx", "doc2.docx"])
     """
     
-    def __init__(self, use_default_rules: bool = True):
+    def __init__(self,
+                use_default_rules: bool = True,
+                hash_original: bool = False
+    ):
         """
         Args:
             use_default_rules: Если True, добавляет стандартные правила извлечения.
         """
         self._rules: list[IoCExtractionRule] = []
+
+        normlizer = IoCNormalizer(
+            hash_original=hash_original
+        )
         
         if use_default_rules:
             self._rules.extend([
-                ListAfterColonRule(),
-                TableAfterHeaderRule(),
-                RegexPatternRule(),
+                ListAfterColonRule(normlizer),
+                TableAfterHeaderRule(normlizer),
+                RegexPatternRule(normlizer),
             ])
     
     def add_rule(self, rule: IoCExtractionRule) -> "IoCExtractor":

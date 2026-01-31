@@ -100,7 +100,14 @@ class IoCNormalizer:
             r'(?:\[\.\]|\.)){1,}[a-zA-Z]{2,}$'
         ),
     }
+
+    _hash_original = False
     
+    def __init__(self,
+                 hash_original: bool = False,
+                 ) -> None:
+        self._hash_original = hash_original
+
     @classmethod
     def refang(cls, value: str) -> tuple[str, bool]:
         """
@@ -171,6 +178,11 @@ class IoCNormalizer:
         
         normalized, was_defanged = cls.refang(cleaned)
         ioc_type = cls.classify(normalized)
+
+        if not cls._hash_original \
+            and ioc_type in [IoCType.HASH_MD5, IoCType.HASH_SHA1, 
+                         IoCType.HASH_SHA256, IoCType.HASH_SHA512]:
+            normalized = normalized.upper()
         
         return IoC(
             value=normalized,
