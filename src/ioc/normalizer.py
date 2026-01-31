@@ -88,16 +88,15 @@ class IoCNormalizer:
             r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
         ),
         IoCType.EMAIL: re.compile(
-            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            r'^[\w0-9._%+-]+@[\w0-9.-]+\.[\w]{2,}$'
         ),
         IoCType.CVE: re.compile(r'^CVE-\d{4}-\d{4,}$', re.IGNORECASE),
         IoCType.URL: re.compile(
-            r'^(?:hxxps?|https?|ftp)://[^\s;.]+(?:\.[^\s;.]+)*(?:/[^\s]*)?$',
+            r'^(?:\w+)://[^\s;.]+(?:\.[^\s;.]+)*(?:/[^\s]*)?$',
             re.IGNORECASE
         ),
         IoCType.DOMAIN: re.compile(
-            r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?'
-            r'(?:\[\.\]|\.)){1,}[a-zA-Z]{2,}$'
+            r'^(?:[\w0-9](?:[\w0-9-]{0,61}[\w0-9])?(?:\[\.\]|\.)){1,}[\w]{2,}(?:\:\d{1,5})?$'
         ),
     }
 
@@ -174,7 +173,7 @@ class IoCNormalizer:
         original = value.strip()
         
         # Очищаем от разделителей списков (;.) в конце
-        cleaned = original.rstrip(';.')
+        cleaned = original.rstrip(',);.')
         
         normalized, was_defanged = cls.refang(cleaned)
         ioc_type = cls.classify(normalized)
