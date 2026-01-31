@@ -43,12 +43,13 @@ class RegexPatternRule(IoCExtractionRule):
         'email': re.compile(r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'),
     }
     
-    def __init__(self, patterns: Optional[dict] = None):
+    def __init__(self, normalizer: IoCNormalizer, patterns: Optional[dict] = None):
         """
         Args:
             patterns: Словарь дополнительных паттернов {имя: regex}
                      Если None, используются только встроенные паттерны.
         """
+        self._normalizer = normalizer
         self._custom_patterns = patterns or {}
     
     @property
@@ -85,7 +86,7 @@ class RegexPatternRule(IoCExtractionRule):
                 end = min(len(full_text), match.end() + 50)
                 context = full_text[start:end].replace('\n', ' ').strip()
                 
-                yield IoCNormalizer.normalize_and_classify(value, f"[{pattern_name}] ...{context}...")
+                yield self._normalizer.normalize_and_classify(value, f"[{pattern_name}] ...{context}...")
 
     def normalize_text_for_url_extraction(self, text: str) -> str:
         """

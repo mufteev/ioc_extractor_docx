@@ -22,7 +22,10 @@ class TableAfterHeaderRule(IoCExtractionRule):
         "ioc",
         "iocs",
     ]
-    
+
+    def __init__(self, normlizer: IoCNormalizer) -> None:
+        self._normlizer = normlizer
+
     @property
     def name(self) -> str:
         return "table_after_header"
@@ -96,4 +99,4 @@ class TableAfterHeaderRule(IoCExtractionRule):
                 for line in cell_text.split('\n'):
                     line = line.strip()
                     if line and line.lower() not in HEADER_WORDS:
-                        yield IoCNormalizer.normalize_and_classify(line, context)
+                        yield self._normlizer.normalize_and_classify(line, context)

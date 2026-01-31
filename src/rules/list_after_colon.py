@@ -20,6 +20,9 @@ class ListAfterColonRule(IoCExtractionRule):
     - Списки из одного элемента
     """
     
+    def __init__(self, normalizer: IoCNormalizer) -> None:
+        self._normalizer = normalizer
+
     @property
     def name(self) -> str:
         return "list_after_colon"
@@ -48,7 +51,7 @@ class ListAfterColonRule(IoCExtractionRule):
                     if item_text.endswith(';'):
                         value = item_text[:-1].strip()
                         if value:
-                            yield IoCNormalizer.normalize_and_classify(value, context)
+                            yield self._normalizer.normalize_and_classify(value, context)
                         i += 1
                         continue
                     
@@ -56,7 +59,7 @@ class ListAfterColonRule(IoCExtractionRule):
                     if item_text.endswith('.'):
                         value = item_text[:-1].strip()
                         if value:
-                            yield IoCNormalizer.normalize_and_classify(value, context)
+                            yield self._normalizer.normalize_and_classify(value, context)
                         i += 1
                         break
                     
@@ -64,7 +67,7 @@ class ListAfterColonRule(IoCExtractionRule):
                     # или уже начался новый контекст
                     # Проверяем, похоже ли это на IoC
                     if self._looks_like_ioc(item_text):
-                        yield IoCNormalizer.normalize_and_classify(item_text, context)
+                        yield self._normalizer.normalize_and_classify(item_text, context)
                         i += 1
                         continue
                     
