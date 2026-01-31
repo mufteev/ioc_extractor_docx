@@ -23,6 +23,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator, Optional
+from urllib.parse import urlparse
 
 from docx import Document as DocxDocument
 from docx.document import Document
@@ -124,7 +125,46 @@ class IoCExtractor:
         """Возвращает список имён активных правил."""
         return [r.name for r in self._rules]
     
-    def extract(self, filepath: str | Path, pass_unknown: bool = False) -> ExtractionResult:
+
+    def extract_base_domain_from_url(self, url: str) -> str:
+        """
+        Извлекает базовый домен из URL.
+        
+        Args:
+            url: Полный URL
+            
+        Returns:
+            Базовый домен (например, example.com)
+        """
+        parsed = urlparse(url)
+        host_with_port = parsed.netloc
+        
+        if ':' in host_with_port:
+            # Проверяем, что после : идут только цифры (это порт)
+            parts = host_with_port.rsplit(':', 1)
+            if parts[1].isdigit():
+                return parts[0]
+        
+        return host_with_port
+    
+    def extract_base_domain_from_domain(self, domain: str) -> str:
+        """
+        Извлекает базовый домен из доменного имени.
+        
+        Args:
+            domain: Полное доменное имя
+            
+        Returns:
+            Базовый домен (например, example.com)
+        """
+        # Убираем порт, если он присутствует
+        if ':' in domain:
+            # Отделяем порт (всё после последнего двоеточия)
+            return domain.rsplit(':', 1)[0]
+        
+        return domain
+
+    def extract(self, filepath: str | Path, pass_unknown: bool = False, url_original: bool = False) -> ExtractionResult:
         """
         Извлекает IoC из одного файла.
         
@@ -160,6 +200,13 @@ class IoCExtractor:
                     if not pass_unknown and ioc.ioc_type == IoCType.UNKNOWN:
                         continue
 
+                    if not url_original:
+                        if ioc.ioc_type == IoCType.URL:
+                            ioc.value = self.extract_base_domain_from_url(ioc.value)
+                            ioc.ioc_type = IoCType.DOMAIN
+                        elif ioc.ioc_type == IoCType.DOMAIN:
+                            ioc.value = self.extract_base_domain_from_domain(ioc.value)
+
                     # Дедупликация
                     key = (ioc.value, ioc.ioc_type)
                     if key not in seen_iocs:
@@ -174,7 +221,8 @@ class IoCExtractor:
     def extract_from_files(
         self, 
         filepaths: list[str | Path],
-        pass_unknown: bool = False
+        pass_unknown: bool = False,
+        url_original: bool = False,
     ) -> dict[str, ExtractionResult]:
         """
         Извлекает IoC из нескольких файлов.
@@ -189,7 +237,9 @@ class IoCExtractor:
         
         for filepath in filepaths:
             filepath_str = str(filepath)
-            results[filepath_str] = self.extract(filepath, pass_unknown=pass_unknown)
+            results[filepath_str] = self.extract(filepath,
+                                                 pass_unknown=pass_unknown,
+                                                 url_original=url_original)
         
         return results
 
@@ -197,7 +247,9 @@ class IoCExtractor:
 def extract_iocs_from_files(
     filepaths: list[str | Path],
     custom_rules: Optional[list[IoCExtractionRule]] = None,
-    pass_unknown: bool = False
+    pass_unknown: bool = False,
+    hash_original: bool = False,
+    url_original: bool = False,
 ) -> dict[str, ExtractionResult]:
     """
     Удобная функция для извлечения IoC из нескольких файлов.
@@ -219,13 +271,16 @@ def extract_iocs_from_files(
             for ioc in result.iocs:
                 print(f"  [{ioc.ioc_type.name}] {ioc.value}")
     """
-    extractor = IoCExtractor(use_default_rules=True)
+    extractor = IoCExtractor(use_default_rules=True,
+                             hash_original=hash_original)
     
     if custom_rules:
         for rule in custom_rules:
             extractor.add_rule(rule)
     
-    return extractor.extract_from_files(filepaths, pass_unknown=pass_unknown)
+    return extractor.extract_from_files(filepaths,
+                                        pass_unknown=pass_unknown,
+                                        url_original=url_original)
 
 
 # ============================================================================

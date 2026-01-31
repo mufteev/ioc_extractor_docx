@@ -35,9 +35,15 @@ if __name__ == "__main__":
         action="store_true",
         help="Выводить unknown IoC (по умолчанию: не выводить)"
     )
+    parser.add_argument(
+        "--url-original",
+        action="store_true",
+        help="Выводить оригинальные URL (по умолчанию: извлечение доменов и IP-адресов)"
+    )
     args = parser.parse_args()
 
-    results = extract_iocs_from_files(args.files, pass_unknown=args.unknown)
+                                      hash_original=args.hash_original,
+                                      url_original=args.url_original)
 
     if args.format:
         if args.format == "json":
